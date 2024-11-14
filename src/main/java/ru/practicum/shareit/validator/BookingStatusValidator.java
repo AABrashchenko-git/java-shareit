@@ -4,6 +4,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import java.util.Arrays;
 
 public class BookingStatusValidator implements ConstraintValidator<ValidBookingStatus, BookingStatus> {

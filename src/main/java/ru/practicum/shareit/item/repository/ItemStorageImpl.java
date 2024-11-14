@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -32,9 +29,9 @@ public class ItemStorageImpl implements ItemStorage {
     }
 
     @Override
-    public Item getItemById(Integer itemId) {
+    public Optional<Item> getItemById(Integer itemId) {
         log.info("get /items/{} handled", itemId);
-        return items.get(itemId);
+        return Optional.of(items.get(itemId));
     }
 
     @Override

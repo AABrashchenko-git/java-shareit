@@ -8,6 +8,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -21,12 +22,12 @@ public class UserStorageImpl implements UserStorage {
     }
 
     @Override
-    public User getUser(Integer userId) {
+    public Optional<User> getUser(Integer userId) {
         if (!users.containsKey(userId)) {
             throw new NotFoundException(String.format("user with id = %d is not found", userId));
         }
         log.info("get /users/{} handled", userId);
-        return users.get(userId);
+        return Optional.of(users.get(userId));
     }
 
     @Override

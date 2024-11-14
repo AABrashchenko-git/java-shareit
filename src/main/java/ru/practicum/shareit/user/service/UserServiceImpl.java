@@ -25,18 +25,18 @@ public class UserServiceImpl implements UserService {
     public UserDto addUser(UserDto userDto) {
         if (userDto.getName() == null || userDto.getEmail() == null)
             throw new ValidationException("name and email should not be null");
-        isUserDtoValid(userDto);
+        validateUserDto(userDto);
         emailExists(userDto);
         User user = UserMapper.userDtoToUser(userDto);
         return UserMapper.userToUserDto(userStorage.addUser(user));
     }
 
     public UserDto updateUser(Integer userId, UserDto newUserDto) {
-        isUserDtoValid(newUserDto);
+        validateUserDto(newUserDto);
         emailExists(newUserDto);
-        User userToUpdate = userStorage.getUser(userId);
-        if (userToUpdate == null)
-            throw new NotFoundException("User " + userId + " is not found");
+        User userToUpdate = userStorage.getUser(userId)
+                .orElseThrow(() -> new NotFoundException("User " + userId + " is not found"));
+
         if (newUserDto.getName() != null && !newUserDto.getName().isBlank())
             userToUpdate.setName(newUserDto.getName());
         if (newUserDto.getEmail() != null && !newUserDto.getEmail().isBlank())
@@ -46,7 +46,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto getUser(int id) {
-        User user = userStorage.getUser(id);
+        User user = userStorage.getUser(id)
+                .orElseThrow(() -> new NotFoundException("User " + id + " is not found"));
         return UserMapper.userToUserDto(user);
     }
 
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
         userStorage.removeUser(userId);
     }
 
-    private void isUserDtoValid(UserDto userDto) {
+    private void validateUserDto(UserDto userDto) {
         if (userDto.getName() != null && userDto.getName().isBlank())
             throw new ValidationException("name should not be empty");
         if (userDto.getEmail() != null && userDto.getEmail().isBlank())

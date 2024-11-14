@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = BookingStatusValidator.class)
 public @interface ValidBookingStatus {
     String message() default "Invalid booking status";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

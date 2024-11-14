@@ -9,7 +9,6 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.repository.ItemStorage;
-import ru.practicum.shareit.user.model.UserDto;
 import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.util.List;
@@ -21,21 +20,16 @@ public class ItemServiceImpl implements ItemService {
     private final UserStorage userStorage;
 
     public ItemDto addItem(Integer ownerId, ItemDto itemDto) {
-        /*if (itemDto.getName() == null || itemDto.getDescription() == null || itemDto.getAvailable() == null)
-            throw new ValidationException("all item fields should not be null");*/
-        isItemDtoValid(itemDto);
-        if (userStorage.getUser(ownerId) == null)
-            throw new NotFoundException("User " + ownerId + " is not found");
+        validateItemDto(itemDto);
+        userStorage.getUser(ownerId).orElseThrow(() -> new NotFoundException("User " + ownerId + " is not found"));
         Item item = ItemMapper.itemDtoToItem(itemDto);
         item.setOwnerId(ownerId);
         return ItemMapper.itemToItemDto(itemStorage.addItem(item));
     }
 
     public ItemDto editItem(Integer ownerId, Integer itemId, ItemDto itemDto) {
-
-        Item item = itemStorage.getItemById(itemId);
-        if (item == null)
-            throw new NotFoundException("Item " + itemId + " is not found");
+        Item item = itemStorage.getItemById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item " + itemId + " is not found"));
 
         if (!item.getOwnerId().equals(ownerId))
             throw new AccessDeniedException(String.format("User %d has no access to modify the resource", ownerId));
@@ -51,9 +45,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto getItemById(Integer itemId) {
-        Item item = itemStorage.getItemById(itemId);
-        if (item == null)
-            throw new NotFoundException("Item " + itemId + " is not found");
+        Item item = itemStorage.getItemById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item " + itemId + " is not found"));
         return ItemMapper.itemToItemDto(item);
     }
 
@@ -67,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(ItemDto::getAvailable).toList();
     }
 
-    private void isItemDtoValid(ItemDto itemDto) {
+    private void validateItemDto(ItemDto itemDto) {
         if (itemDto.getName() == null || itemDto.getName().isBlank())
             throw new ValidationException("name should not be empty");
         if (itemDto.getDescription() == null || itemDto.getDescription().isBlank())
