@@ -42,6 +42,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("[]");
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<String> handleValidationException(ValidationException ex) {
+        log.warn("Processing failed: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[]");
+    }
+
     @ExceptionHandler
     public ResponseEntity<String> handleInternalServerError(Throwable th) {
         log.warn("Processing failed: {}", th.getMessage());

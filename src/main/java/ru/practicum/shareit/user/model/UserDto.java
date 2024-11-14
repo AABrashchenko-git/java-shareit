@@ -13,8 +13,6 @@ import lombok.EqualsAndHashCode;
 public class UserDto {
     private Integer id;
     @Email(message = "Invalid Email format, expected nickname@postservice.com")
-    @NotEmpty(message = "Email cannot be empty")
     private String email;
-    @NotBlank(message = "Login cannot be empty")
     private String name;
 }

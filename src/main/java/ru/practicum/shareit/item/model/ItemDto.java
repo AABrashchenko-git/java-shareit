@@ -11,11 +11,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(of = {"id"})
 public class ItemDto {
     private Integer id;
-    @NotBlank(message = "Item name cannot be empty")
     private String name;
-    @NotBlank(message = "Item description cannot be empty")
     private String description;
-    @NotNull(message = "Item availability cannot be empty")
     private Boolean available;
     private Integer ownerId;
 }

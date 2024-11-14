@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Data
 @Builder(toBuilder = true)
 @EqualsAndHashCode(of = {"id"})
