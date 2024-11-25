@@ -1,23 +1,26 @@
 package ru.practicum.shareit.request.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-@Data
+@Entity
+@Table(name = "requests")
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"id"})
+@AllArgsConstructor @NoArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(of = {"id"})
 public class ItemRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @NotBlank(message = "description cannot be empty")
     private String description;
     @NotNull(message = "requestorId should not be empty")
-    private Integer requestorId;
+    private User requestor;
     @PastOrPresent
     private LocalDateTime created;
 }

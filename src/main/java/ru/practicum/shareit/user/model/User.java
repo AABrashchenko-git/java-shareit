@@ -1,16 +1,19 @@
 package ru.practicum.shareit.user.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
-@Data
+
+@Entity
+@Table(name = "users")
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = {"id"})
+@AllArgsConstructor @NoArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(of = {"id"})
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Email(message = "Invalid Email format, expected nickname@postservice.com")
     @NotEmpty(message = "Email cannot be empty")
