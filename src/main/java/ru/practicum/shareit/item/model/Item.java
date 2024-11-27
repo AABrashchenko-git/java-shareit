@@ -12,6 +12,7 @@ import lombok.*;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
     private Integer id;
     @NotBlank(message = "name cannot be empty")
     private String name;
@@ -20,5 +21,6 @@ public class Item {
     @NotNull(message = "availability should not be empty")
     private Boolean available;
     @NotNull(message = "ownerId should not be empty")
+    @Column(name = "owner_id")
     private Integer ownerId;
 }

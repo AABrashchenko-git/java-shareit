@@ -6,29 +6,32 @@ import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemDto;
-import ru.practicum.shareit.item.repository.ItemStorage;
-import ru.practicum.shareit.user.repository.UserStorage;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final ItemStorage itemStorage;
-    private final UserStorage userStorage;
+    private final ItemRepository itemStorage;
+    private final UserRepository userStorage;
 
+    @Override
     public ItemDto addItem(Integer ownerId, ItemDto itemDto) {
         validateItemDto(itemDto);
-        userStorage.getUser(ownerId).orElseThrow(() -> new NotFoundException("User " + ownerId + " is not found"));
+        userStorage.findById(ownerId).orElseThrow(() -> new NotFoundException("User " + ownerId + " is not found"));
         Item item = ItemMapper.itemDtoToItem(itemDto);
         item.setOwnerId(ownerId);
-        return ItemMapper.itemToItemDto(itemStorage.addItem(item));
+        return ItemMapper.itemToItemDto(itemStorage.save(item));
     }
 
+    @Override
     public ItemDto editItem(Integer ownerId, Integer itemId, ItemDto itemDto) {
-        Item item = itemStorage.getItemById(itemId)
+        Item item = itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item " + itemId + " is not found"));
 
         if (!item.getOwnerId().equals(ownerId))
@@ -41,23 +44,32 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null)
             item.setAvailable(itemDto.getAvailable());
 
-        return ItemMapper.itemToItemDto(itemStorage.editItem(item));
+        return ItemMapper.itemToItemDto(itemStorage.save(item));
     }
 
+    @Override
     public ItemDto getItemById(Integer itemId) {
-        Item item = itemStorage.getItemById(itemId)
+        Item item = itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item " + itemId + " is not found"));
         return ItemMapper.itemToItemDto(item);
     }
 
+    @Override
     public List<ItemDto> getAllItemsByOwner(Integer ownerId) {
-        return itemStorage.getAllItemsByOwner(ownerId).stream().map(ItemMapper::itemToItemDto).toList();
+        return itemStorage.findAllByOwnerId(ownerId).stream().map(ItemMapper::itemToItemDto).toList();
     }
 
+    @Override
     public List<ItemDto> searchItems(String text) {
-        return itemStorage.searchItems(text)
+        return itemStorage.findItemsBySearchQuery(text)
                 .stream().map(ItemMapper::itemToItemDto)
                 .filter(ItemDto::getAvailable).toList();
+    }
+
+    @Override
+    public CommentDto addComment(Integer itemId, CommentDto commentDto) {
+        //TODO
+        return null;
     }
 
     private void validateItemDto(ItemDto itemDto) {

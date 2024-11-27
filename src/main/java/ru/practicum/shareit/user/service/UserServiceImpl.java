@@ -8,7 +8,7 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserDto;
-import ru.practicum.shareit.user.repository.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userStorage;
 
     public Collection<UserDto> getAllUsers() {
-        return userStorage.getAllUsers().stream().map(UserMapper::userToUserDto).collect(Collectors.toList());
+        return userStorage.findAll().stream().map(UserMapper::userToUserDto).collect(Collectors.toList());
     }
 
     public UserDto addUser(UserDto userDto) {
@@ -28,13 +28,13 @@ public class UserServiceImpl implements UserService {
         validateUserDto(userDto);
         emailExists(userDto);
         User user = UserMapper.userDtoToUser(userDto);
-        return UserMapper.userToUserDto(userStorage.addUser(user));
+        return UserMapper.userToUserDto(userStorage.save(user));
     }
 
     public UserDto updateUser(Integer userId, UserDto newUserDto) {
         validateUserDto(newUserDto);
         emailExists(newUserDto);
-        User userToUpdate = userStorage.getUser(userId)
+        User userToUpdate = userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User " + userId + " is not found"));
 
         if (newUserDto.getName() != null && !newUserDto.getName().isBlank())
@@ -42,17 +42,17 @@ public class UserServiceImpl implements UserService {
         if (newUserDto.getEmail() != null && !newUserDto.getEmail().isBlank())
             userToUpdate.setEmail(newUserDto.getEmail());
 
-        return UserMapper.userToUserDto(userStorage.updateUser(userToUpdate));
+        return UserMapper.userToUserDto(userStorage.save(userToUpdate));
     }
 
     public UserDto getUser(int id) {
-        User user = userStorage.getUser(id)
+        User user = userStorage.findById(id)
                 .orElseThrow(() -> new NotFoundException("User " + id + " is not found"));
         return UserMapper.userToUserDto(user);
     }
 
     public void removeUser(int userId) {
-        userStorage.removeUser(userId);
+        userStorage.deleteById(userId);
     }
 
     private void validateUserDto(UserDto userDto) {
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void emailExists(UserDto userDto) {
-        boolean emailExists = !userStorage.getAllUsers().stream()
+        boolean emailExists = !userStorage.findAll().stream()
                 .filter(u -> u.getEmail().equals(userDto.getEmail()))
                 .toList().isEmpty();
         if (emailExists)

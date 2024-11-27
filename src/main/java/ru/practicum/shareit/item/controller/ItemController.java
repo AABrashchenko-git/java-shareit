@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -47,5 +48,11 @@ public class ItemController {
     public List<ItemDto> searchItems(@RequestParam String text) {
         log.info("GET /search with search query \"{}\" is accessed", text);
         return itemService.searchItems(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestParam Integer itemId, @RequestBody @Valid CommentDto commentDto) {
+        log.info("POST /items/{}/comment", itemId);
+        return itemService.addComment(itemId, commentDto);
     }
 }

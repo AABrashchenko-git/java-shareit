@@ -14,6 +14,7 @@ import lombok.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Integer id;
     @Email(message = "Invalid Email format, expected nickname@postservice.com")
     @NotEmpty(message = "Email cannot be empty")
