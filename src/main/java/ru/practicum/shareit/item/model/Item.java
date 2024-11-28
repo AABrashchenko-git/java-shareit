@@ -8,7 +8,12 @@ import lombok.*;
 @Entity
 @Table(name = "items")
 @Builder(toBuilder = true)
-@AllArgsConstructor @NoArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(of = {"id"})
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = {"id"})
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

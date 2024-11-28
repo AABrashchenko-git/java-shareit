@@ -3,9 +3,12 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.model.*;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingDto;
+import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.repository.BookingSpecifications;
 import ru.practicum.shareit.exception.InvalidRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -69,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
 
         Integer owner = booking.getItem().getOwnerId();
         Integer booker = booking.getBooker().getId();
-        if(!userId.equals(owner) && !userId.equals(booker))
+        if (!userId.equals(owner) && !userId.equals(booker))
             throw new InvalidRequestException("booking can be accessed only by booker and owner");
 
         return BookingMapper.bookingToBookingDto(booking);
@@ -77,9 +80,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getAllBookingsByBookerId(Integer bookerId, BookingState state) {
-        //Бронирования должны возвращаться отсортированными по дате от более новых к более старым
         userExists(bookerId);
-
         List<Booking> bookings;
 
         switch (state) {
@@ -113,14 +114,6 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
     }
-
-    private List<BookingDto> getBookingsByCondition(Integer userId, BookingState state, Specification<Booking> condition) {
-        return null;
-    }
-
-
-
-
 
     private void userExists(Integer userId) {
         if (!userRepository.existsById(userId))

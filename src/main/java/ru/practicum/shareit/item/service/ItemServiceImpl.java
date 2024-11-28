@@ -10,7 +10,6 @@ import ru.practicum.shareit.exception.InvalidRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.mapper.CommentMapper;
-import ru.practicum.shareit.item.mapper.CommentMapperImpl;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.*;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -69,19 +68,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemResponseOnlyDto> getAllItemsByOwner(Integer ownerId) {
-        //TODO добавить комменты и даты бронирования, проверить наличие пользователя
         List<Item> items = itemStorage.findAllByOwnerId(ownerId);
-
-        //........
-
-        return items.stream().map(item -> prepareItemForResponseDto(item.getOwnerId(), item)).collect(Collectors.toList());
+        return items.stream()
+                .map(item -> prepareItemForResponseDto(item.getOwnerId(), item)).collect(Collectors.toList());
     }
 
     @Override
     public List<ItemDto> searchItems(String text) {
-        if(text.isBlank())
+        if (text.isBlank())
             return Collections.emptyList();
-        //TODO CHECK
         return itemStorage.findItemsBySearchQuery(text)
                 .stream().map(ItemMapper::itemToItemDto)
                 .filter(ItemDto::getAvailable).toList();
@@ -89,10 +84,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(Integer authorId, Integer itemId, CommentDto commentDto) {
-        if(commentDto.getText() == null || commentDto.getText().isBlank())
+        if (commentDto.getText() == null || commentDto.getText().isBlank())
             throw new InvalidRequestException("empty comment");
-        //TODO
-        // проверить, что пользователь реально брал вещь в аренду и срок аренды закончился
+
         List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerId(itemId, authorId)
                 .stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).toList();
 
@@ -109,67 +103,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private ItemResponseOnlyDto prepareItemForResponseDto(Integer userId, Item item) {
-
         ItemResponseOnlyDto itemResponseDto = ItemMapper.itemToItemResponseDto(item);
-
         List<Booking> bookingsOfItem = bookingRepository.findAllByItemOwnerId(item.getOwnerId());
-       // bookingsOfItem.stream().sorted((b1, b2) -> b1.getStart().compareTo(b2.getStart()));
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!" + bookingsOfItem);
 
-        if(item.getOwnerId().equals(userId)) {
+        if (item.getOwnerId().equals(userId)) {
             bookingsOfItem.stream()
-                    .filter(b -> b.getStart().isAfter(LocalDateTime.now()) && b.getStatus().equals(BookingStatus.APPROVED))
+                    .filter(b -> b.getStart().isAfter(LocalDateTime.now())
+                            && b.getStatus().equals(BookingStatus.APPROVED))
                     .min(Comparator.comparing(Booking::getStart))
                     .ifPresent(booking -> itemResponseDto.setNextBooking(booking.getStart()));
 
             bookingsOfItem.stream()
-                    .filter(b -> b.getEnd().isBefore(LocalDateTime.now()) && b.getStatus().equals(BookingStatus.APPROVED))
+                    .filter(b -> b.getEnd().isBefore(LocalDateTime.now())
+                            && b.getStatus().equals(BookingStatus.APPROVED))
                     .max(Comparator.comparing(Booking::getEnd))
-                    .ifPresent(booking ->  itemResponseDto.setLastBooking(booking.getStart()));
+                    .ifPresent(booking -> itemResponseDto.setLastBooking(booking.getStart()));
         }
 
-
-
-
-
-        /*
-        itemBooking.stream()
-                .filter(i -> i.getStart().isAfter(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
-                .min(Comparator.comparing(Booking::getStart))
-                .ifPresent(nextBooking -> itemDto.setNextBooking(bookingMapper.toBookingItemDto(nextBooking)));
-
-         itemBooking.stream()
-                .filter(i -> i.getEnd().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
-                .max(Comparator.comparing(Booking::getEnd))
-                .ifPresent(lastBooking -> itemDto.setLastBooking(bookingMapper.toBookingItemDto(lastBooking)));
-
-
-
-         */
-
-        /*
-        Optional<Booking> nextBooking = bookings.stream()
-                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now())
-                        && booking.getStatus().equals(BookingStatus.APPROVED))
-                .min(Comparator.comparing(Booking::getStart));
-
-        Optional<Booking> lastBooking = bookings.stream()
-                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) &&
-                        booking.getStatus().equals(BookingStatus.APPROVED))
-                .max(Comparator.comparing(Booking::getEnd));
-         */
-
-
-
-
-
-
-
-        //получаем комменты для вещи
         List<CommentDto> commentsDto = commentRepository.findAllByItemId(item.getId())
                 .stream().map(commentMapper::toCommentDto).toList();
-        itemResponseDto.setComments(commentsDto);
 
+        itemResponseDto.setComments(commentsDto);
         return itemResponseDto;
     }
 
