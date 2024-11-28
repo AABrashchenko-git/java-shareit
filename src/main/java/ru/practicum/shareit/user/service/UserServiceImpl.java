@@ -18,10 +18,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userStorage;
 
+    @Override
     public Collection<UserDto> getAllUsers() {
         return userStorage.findAll().stream().map(UserMapper::userToUserDto).collect(Collectors.toList());
     }
 
+    @Override
     public UserDto addUser(UserDto userDto) {
         if (userDto.getName() == null || userDto.getEmail() == null)
             throw new ValidationException("name and email should not be null");
@@ -31,6 +33,7 @@ public class UserServiceImpl implements UserService {
         return UserMapper.userToUserDto(userStorage.save(user));
     }
 
+    @Override
     public UserDto updateUser(Integer userId, UserDto newUserDto) {
         validateUserDto(newUserDto);
         emailExists(newUserDto);
@@ -45,12 +48,14 @@ public class UserServiceImpl implements UserService {
         return UserMapper.userToUserDto(userStorage.save(userToUpdate));
     }
 
+    @Override
     public UserDto getUser(int id) {
         User user = userStorage.findById(id)
                 .orElseThrow(() -> new NotFoundException("User " + id + " is not found"));
         return UserMapper.userToUserDto(user);
     }
 
+    @Override
     public void removeUser(int userId) {
         userStorage.deleteById(userId);
     }
