@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.model.*;
 import ru.practicum.shareit.booking.repository.BookingSpecifications;
 import ru.practicum.shareit.exception.InvalidRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -68,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
 
         Integer owner = booking.getItem().getOwnerId();
         Integer booker = booking.getBooker().getId();
-        if(!userId.equals(owner) || !userId.equals(booker))
+        if(!userId.equals(owner) && !userId.equals(booker))
             throw new InvalidRequestException("booking can be accessed only by booker and owner");
 
         return BookingMapper.bookingToBookingDto(booking);
@@ -123,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void userExists(Integer userId) {
         if (!userRepository.existsById(userId))
-            throw new NotFoundException("user not found");
+            throw new ValidationException("user not found");
     }
 
     private Booking getBookingIfExists(Integer bookingId) {

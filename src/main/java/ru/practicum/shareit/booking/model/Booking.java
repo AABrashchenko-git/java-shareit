@@ -19,13 +19,13 @@ import java.time.LocalDateTime;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull(message = "Booking Id should not be empty")
+    //@NotNull(message = "Booking Id should not be empty")
     @Column(name = "booking_id")
     private Integer id;
-    @PastOrPresent(message = "Incorrect date")
+    //@PastOrPresent(message = "Incorrect date")
     @Column(name = "start_date")
     private LocalDateTime start;
-    @FutureOrPresent(message = "Incorrect date")
+    //@FutureOrPresent(message = "Incorrect date")
     @Column(name = "end_date")
     private LocalDateTime end;
     @Valid

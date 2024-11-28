@@ -31,4 +31,11 @@ public interface BookingRepository extends JpaRepository<Booking, Integer>, JpaS
             "WHERE i.ownerId = :ownerId ORDER BY b.start ASC")
     List<Booking> findAllByOwnerId(@Param("ownerId") Integer ownerId);
 
+    //для ItemResponseOnlyDto
+    @Query("SELECT b FROM Booking as b JOIN b.item AS i WHERE i.ownerId = :ownerId")
+    List<Booking> findAllByItemOwnerId(@Param("ownerId") Integer ownerId);
+
+    //для проверки комментария
+    List<Booking> findAllByItemIdAndBookerId(Integer itemId, Integer bookerId);
+
 }

@@ -2,23 +2,36 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessDeniedException;
+import ru.practicum.shareit.exception.InvalidRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.CommentMapperImpl;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.model.CommentDto;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.model.ItemDto;
+import ru.practicum.shareit.item.model.*;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemStorage;
     private final UserRepository userStorage;
+    private final BookingRepository bookingRepository;
+    private final CommentMapper commentMapper;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto addItem(Integer ownerId, ItemDto itemDto) {
@@ -48,28 +61,116 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getItemById(Integer itemId) {
+    public ItemResponseOnlyDto getItemById(Integer userId, Integer itemId) {
         Item item = itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item " + itemId + " is not found"));
-        return ItemMapper.itemToItemDto(item);
+        return prepareItemForResponseDto(userId, item);
     }
 
     @Override
-    public List<ItemDto> getAllItemsByOwner(Integer ownerId) {
-        return itemStorage.findAllByOwnerId(ownerId).stream().map(ItemMapper::itemToItemDto).toList();
+    public List<ItemResponseOnlyDto> getAllItemsByOwner(Integer ownerId) {
+        //TODO добавить комменты и даты бронирования, проверить наличие пользователя
+        List<Item> items = itemStorage.findAllByOwnerId(ownerId);
+
+        //........
+
+        return items.stream().map(item -> prepareItemForResponseDto(item.getOwnerId(), item)).collect(Collectors.toList());
     }
 
     @Override
     public List<ItemDto> searchItems(String text) {
+        if(text.isBlank())
+            return Collections.emptyList();
+        //TODO CHECK
         return itemStorage.findItemsBySearchQuery(text)
                 .stream().map(ItemMapper::itemToItemDto)
                 .filter(ItemDto::getAvailable).toList();
     }
 
     @Override
-    public CommentDto addComment(Integer itemId, CommentDto commentDto) {
+    public CommentDto addComment(Integer authorId, Integer itemId, CommentDto commentDto) {
+        if(commentDto.getText() == null || commentDto.getText().isBlank())
+            throw new InvalidRequestException("empty comment");
         //TODO
-        return null;
+        // проверить, что пользователь реально брал вещь в аренду и срок аренды закончился
+        List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerId(itemId, authorId)
+                .stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).toList();
+
+        if (bookings.isEmpty())
+            throw new InvalidRequestException("User did not book the item or booking period have not finished");
+
+        User author = userStorage.findById(authorId).orElseThrow(() -> new NotFoundException("user not found"));
+        Item item = itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException("item not found"));
+        Comment comment = commentMapper.toComment(commentDto);
+        comment.setItem(item);
+        comment.setAuthor(author);
+
+        return commentMapper.toCommentDto(commentRepository.save(comment));
+    }
+
+    private ItemResponseOnlyDto prepareItemForResponseDto(Integer userId, Item item) {
+
+        ItemResponseOnlyDto itemResponseDto = ItemMapper.itemToItemResponseDto(item);
+
+        List<Booking> bookingsOfItem = bookingRepository.findAllByItemOwnerId(item.getOwnerId());
+       // bookingsOfItem.stream().sorted((b1, b2) -> b1.getStart().compareTo(b2.getStart()));
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!" + bookingsOfItem);
+
+        if(item.getOwnerId().equals(userId)) {
+            bookingsOfItem.stream()
+                    .filter(b -> b.getStart().isAfter(LocalDateTime.now()) && b.getStatus().equals(BookingStatus.APPROVED))
+                    .min(Comparator.comparing(Booking::getStart))
+                    .ifPresent(booking -> itemResponseDto.setNextBooking(booking.getStart()));
+
+            bookingsOfItem.stream()
+                    .filter(b -> b.getEnd().isBefore(LocalDateTime.now()) && b.getStatus().equals(BookingStatus.APPROVED))
+                    .max(Comparator.comparing(Booking::getEnd))
+                    .ifPresent(booking ->  itemResponseDto.setLastBooking(booking.getStart()));
+        }
+
+
+
+
+
+        /*
+        itemBooking.stream()
+                .filter(i -> i.getStart().isAfter(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
+                .min(Comparator.comparing(Booking::getStart))
+                .ifPresent(nextBooking -> itemDto.setNextBooking(bookingMapper.toBookingItemDto(nextBooking)));
+
+         itemBooking.stream()
+                .filter(i -> i.getEnd().isBefore(LocalDateTime.now()) && !i.getStatus().equals(ItemStatus.REJECTED))
+                .max(Comparator.comparing(Booking::getEnd))
+                .ifPresent(lastBooking -> itemDto.setLastBooking(bookingMapper.toBookingItemDto(lastBooking)));
+
+
+
+         */
+
+        /*
+        Optional<Booking> nextBooking = bookings.stream()
+                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now())
+                        && booking.getStatus().equals(BookingStatus.APPROVED))
+                .min(Comparator.comparing(Booking::getStart));
+
+        Optional<Booking> lastBooking = bookings.stream()
+                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()) &&
+                        booking.getStatus().equals(BookingStatus.APPROVED))
+                .max(Comparator.comparing(Booking::getEnd));
+         */
+
+
+
+
+
+
+
+        //получаем комменты для вещи
+        List<CommentDto> commentsDto = commentRepository.findAllByItemId(item.getId())
+                .stream().map(commentMapper::toCommentDto).toList();
+        itemResponseDto.setComments(commentsDto);
+
+        return itemResponseDto;
     }
 
     private void validateItemDto(ItemDto itemDto) {
