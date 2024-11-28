@@ -10,7 +10,12 @@ import lombok.*;
 @Entity
 @Table(name = "users")
 @Builder(toBuilder = true)
-@AllArgsConstructor @NoArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(of = {"id"})
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = {"id"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,7 +13,12 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "comments")
 @Builder(toBuilder = true)
-@AllArgsConstructor @NoArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(of = {"id"})
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = {"id"})
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
