@@ -5,7 +5,6 @@ import org.mapstruct.Mapping;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.CommentDto;
 
-// по твоему совету попробовал Mapstruct, пока на одном классе, остальные исправлять уже не стал
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 

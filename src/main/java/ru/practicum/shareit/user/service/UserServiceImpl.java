@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.DuplicatedDataException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -14,16 +15,21 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userStorage;
 
     @Override
     public Collection<UserDto> getAllUsers() {
-        return userStorage.findAll().stream().map(UserMapper::userToUserDto).collect(Collectors.toList());
+        return userStorage.findAll()
+                .stream()
+                .map(UserMapper::userToUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public UserDto addUser(UserDto userDto) {
         if (userDto.getName() == null || userDto.getEmail() == null)
             throw new ValidationException("name and email should not be null");
@@ -34,6 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Integer userId, UserDto newUserDto) {
         validateUserDto(newUserDto);
         emailExists(newUserDto);
@@ -45,7 +52,7 @@ public class UserServiceImpl implements UserService {
         if (newUserDto.getEmail() != null && !newUserDto.getEmail().isBlank())
             userToUpdate.setEmail(newUserDto.getEmail());
 
-        return UserMapper.userToUserDto(userStorage.save(userToUpdate));
+        return UserMapper.userToUserDto(userToUpdate);
     }
 
     @Override
@@ -56,6 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void removeUser(int userId) {
         userStorage.deleteById(userId);
     }
@@ -68,7 +76,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void emailExists(UserDto userDto) {
-        boolean emailExists = !userStorage.findAll().stream()
+        boolean emailExists = !userStorage.findAll()
+                .stream()
                 .filter(u -> u.getEmail().equals(userDto.getEmail()))
                 .toList().isEmpty();
         if (emailExists)

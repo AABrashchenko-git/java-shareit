@@ -29,12 +29,12 @@ public class Comment {
     @Valid
     @NotNull(message = "item should not be empty")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", nullable = false)
+    @JoinColumn(name = "item_id")
     private Item item;
     @Valid
     @NotNull(message = "author should not be empty")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "author_id")
     private User author;
     @PastOrPresent(message = "Incorrect date")
     @NotNull(message = "creation time should not be empty")

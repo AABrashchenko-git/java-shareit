@@ -1,13 +1,16 @@
 package ru.practicum.shareit.item.mapper;
 
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.model.ItemResponseOnlyDto;
 
-@UtilityClass
+@Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
-    public Item itemDtoToItem(ItemDto itemDto) {
+    public static Item itemDtoToItem(ItemDto itemDto) {
         return Item.builder().id(itemDto.getId())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
@@ -16,7 +19,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public ItemDto itemToItemDto(Item item) {
+    public static ItemDto itemToItemDto(Item item) {
         return ItemDto.builder().id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
@@ -25,12 +28,11 @@ public class ItemMapper {
                 .build();
     }
 
-    public ItemResponseOnlyDto itemToItemResponseDto(Item item) {
+    public static ItemResponseOnlyDto itemToItemResponseDto(Item item) {
         return ItemResponseOnlyDto.builder().id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-               // .ownerId(item.getOwnerId())
                 .build();
     }
 }

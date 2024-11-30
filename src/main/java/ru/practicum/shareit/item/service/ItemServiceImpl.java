@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemStorage;
@@ -33,6 +35,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
+    @Transactional
     public ItemDto addItem(Integer ownerId, ItemDto itemDto) {
         validateItemDto(itemDto);
         userStorage.findById(ownerId).orElseThrow(() -> new NotFoundException("User " + ownerId + " is not found"));
@@ -42,6 +45,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto editItem(Integer ownerId, Integer itemId, ItemDto itemDto) {
         Item item = itemStorage.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item " + itemId + " is not found"));
@@ -56,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null)
             item.setAvailable(itemDto.getAvailable());
 
-        return ItemMapper.itemToItemDto(itemStorage.save(item));
+        return ItemMapper.itemToItemDto(item);
     }
 
     @Override
@@ -70,25 +74,29 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemResponseOnlyDto> getAllItemsByOwner(Integer ownerId) {
         List<Item> items = itemStorage.findAllByOwnerId(ownerId);
         return items.stream()
-                .map(item -> prepareItemForResponseDto(item.getOwnerId(), item)).collect(Collectors.toList());
+                .map(item -> prepareItemForResponseDto(item.getOwnerId(), item))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemDto> searchItems(String text) {
         if (text == null || text.isBlank())
             return Collections.emptyList();
-        return itemStorage.findItemsBySearchQuery(text)
-                .stream().map(ItemMapper::itemToItemDto)
-                .filter(ItemDto::getAvailable).toList();
+        return itemStorage.findItemsBySearchQuery(text).stream()
+                .map(ItemMapper::itemToItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public CommentDto addComment(Integer authorId, Integer itemId, CommentDto commentDto) {
         if (commentDto.getText() == null || commentDto.getText().isBlank())
             throw new InvalidRequestException("empty comment");
 
         List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerId(itemId, authorId)
-                .stream().filter(booking -> booking.getEnd().isBefore(LocalDateTime.now())).toList();
+                .stream()
+                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
+                .collect(Collectors.toList());
 
         if (bookings.isEmpty())
             throw new InvalidRequestException("User did not book the item or booking period have not finished");

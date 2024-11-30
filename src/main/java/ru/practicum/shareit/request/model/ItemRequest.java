@@ -28,7 +28,7 @@ public class ItemRequest {
     private String description;
     @Valid
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requestor_id", nullable = false)
+    @JoinColumn(name = "requestor_id")
     private User requestor;
     @PastOrPresent
     @NotNull(message = "creation time should not be empty")

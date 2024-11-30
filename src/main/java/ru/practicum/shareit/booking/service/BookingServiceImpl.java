@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
@@ -20,16 +21,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingMapper bookingMapper;
 
     @Override
+    @Transactional
     public BookingDto addBooking(Integer bookerId, BookingDto bookingDto) {
-        Booking booking = BookingMapper.bookingDtoToBooking(bookingDto);
+        Booking booking = bookingMapper.toBooking(bookingDto);
 
         booking.setStatus(BookingStatus.WAITING);
         booking.setBooker(userRepository.findById(bookerId)
@@ -43,10 +47,11 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getItem().getAvailable()) {
             throw new InvalidRequestException("Item is not available");
         }
-        return BookingMapper.bookingToBookingDto(bookingRepository.save(booking));
+        return bookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
     @Override
+    @Transactional
     public BookingDto approveBooking(Integer ownerId, Integer bookingId, Boolean approved) {
         userExists(ownerId);
         Booking booking = getBookingIfExists(bookingId);
@@ -62,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus(BookingStatus.REJECTED);
         }
 
-        return BookingMapper.bookingToBookingDto(bookingRepository.save(booking));
+        return bookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -75,7 +80,7 @@ public class BookingServiceImpl implements BookingService {
         if (!userId.equals(owner) && !userId.equals(booker))
             throw new InvalidRequestException("booking can be accessed only by booker and owner");
 
-        return BookingMapper.bookingToBookingDto(booking);
+        return bookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -93,7 +98,9 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED, WAITING -> bookings = bookingRepository.getAllBookingsByBookerIdAndStatus(bookerId, state);
             default -> bookings = bookingRepository.findAllByBookerId(bookerId);
         }
-        return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
+        return bookings.stream()
+                .map(bookingMapper::toBookingDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -112,7 +119,9 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED, WAITING -> bookings = bookingRepository.getAllBookingsByOwnerIdAndStatus(ownerId, state);
             default -> bookings = bookingRepository.findAllByOwnerId(ownerId);
         }
-        return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
+        return bookings.stream()
+                .map(bookingMapper::toBookingDto)
+                .collect(Collectors.toList());
     }
 
     private void userExists(Integer userId) {
