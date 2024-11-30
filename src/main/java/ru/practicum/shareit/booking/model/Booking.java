@@ -1,29 +1,41 @@
 package ru.practicum.shareit.booking.model;
 
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import lombok.*;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.validator.ValidBookingStatus;
 
 import java.time.LocalDateTime;
 
-@Data
+@Entity
+@Table(name = "bookings")
 @Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
 @EqualsAndHashCode(of = {"id"})
 public class Booking {
-    @NotNull(message = "Booking Id should not be empty")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "booking_id")
     private Integer id;
-    @PastOrPresent(message = "Incorrect date")
+    @Column(name = "start_date")
     private LocalDateTime start;
-    @FutureOrPresent(message = "Incorrect date")
+    @Column(name = "end_date")
     private LocalDateTime end;
-    @NotNull(message = "itemId should not be empty")
-    private Integer itemId;
-    @NotNull(message = "bookerId should not be empty")
-    private Integer bookerId;
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
+    @Valid
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booker_id")
+    private User booker;
     @ValidBookingStatus
+    @Enumerated(EnumType.STRING)
     private BookingStatus status;
 }

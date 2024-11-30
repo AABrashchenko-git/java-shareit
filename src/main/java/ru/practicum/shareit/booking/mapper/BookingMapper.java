@@ -1,28 +1,21 @@
 package ru.practicum.shareit.booking.mapper;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
-@UtilityClass
-public class BookingMapper {
-    public Booking bookingDtoToBooking(BookingDto bookingDto) {
-        return Booking.builder().id(bookingDto.getId())
-                .start(bookingDto.getStart())
-                .end(bookingDto.getEnd())
-                .itemId(bookingDto.getItemId())
-                .bookerId(bookingDto.getBookerId())
-                .status(bookingDto.getStatus())
-                .build();
-    }
+@Mapper(componentModel = "spring", uses = {ItemMapper.class, UserMapper.class})
+public interface BookingMapper {
 
-    public BookingDto bookingToBookingDto(Booking booking) {
-        return BookingDto.builder().id(booking.getId())
-                .start(booking.getStart())
-                .end(booking.getEnd())
-                .itemId(booking.getItemId())
-                .bookerId(booking.getBookerId())
-                .status(booking.getStatus())
-                .build();
-    }
+    @Mapping(target = "item", ignore = true)
+    @Mapping(target = "booker", ignore = true)
+    Booking toBooking(BookingDto bookingDto);
+
+    @Mapping(source = "item.id", target = "itemId")
+    @Mapping(source = "item", target = "item")
+    @Mapping(source = "booker", target = "booker")
+    BookingDto toBookingDto(Booking booking);
 }
