@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.ItemDto;
+import ru.practicum.shareit.item.model.ItemResponseOnlyDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -32,13 +34,14 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Integer itemId) {
+    public ItemResponseOnlyDto getItemById(@RequestHeader("${shareit.header.owner}") Integer userId,
+                                           @PathVariable Integer itemId) {
         log.info("PATCH /items/{} is accessed", itemId);
-        return itemService.getItemById(itemId);
+        return itemService.getItemById(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllItemsByOwner(@RequestHeader("${shareit.header.owner}") Integer ownerId) {
+    public List<ItemResponseOnlyDto> getAllItemsByOwner(@RequestHeader("${shareit.header.owner}") Integer ownerId) {
         log.info("GET /items with ownerId {} is accessed", ownerId);
         return itemService.getAllItemsByOwner(ownerId);
     }
@@ -47,5 +50,12 @@ public class ItemController {
     public List<ItemDto> searchItems(@RequestParam String text) {
         log.info("GET /search with search query \"{}\" is accessed", text);
         return itemService.searchItems(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader("${shareit.header.owner}") Integer authorId,
+                                 @PathVariable Integer itemId, @RequestBody @Valid CommentDto commentDto) {
+        log.info("POST /items/{}/comment", itemId);
+        return itemService.addComment(authorId, itemId, commentDto);
     }
 }

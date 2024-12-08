@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.model;
+package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
@@ -11,7 +11,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "requests")
+@Table(name = "comments")
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,18 +19,24 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @EqualsAndHashCode(of = {"id"})
-public class ItemRequest {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "request_id")
+    @Column(name = "comment_id")
     private Integer id;
     @NotBlank(message = "description cannot be empty")
-    private String description;
+    private String text;
     @Valid
+    @NotNull(message = "item should not be empty")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requestor_id")
-    private User requestor;
-    @PastOrPresent
+    @JoinColumn(name = "item_id")
+    private Item item;
+    @Valid
+    @NotNull(message = "author should not be empty")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
+    private User author;
+    @PastOrPresent(message = "Incorrect date")
     @NotNull(message = "creation time should not be empty")
     private LocalDateTime created;
 }
