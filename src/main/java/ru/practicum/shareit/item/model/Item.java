@@ -28,4 +28,6 @@ public class Item {
     @NotNull(message = "ownerId should not be empty")
     @Column(name = "owner_id")
     private Integer ownerId;
+    @Column(name = "request_id")
+    private Integer requestId;
 }
