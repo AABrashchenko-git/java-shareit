@@ -95,7 +95,7 @@ public class ItemServiceImpl implements ItemService {
         if (commentDto.getText() == null || commentDto.getText().isBlank())
             throw new InvalidRequestException("empty comment");
 
-        LocalDateTime currentTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.ofHours(3));
+        LocalDateTime currentTime = LocalDateTime.now();
 
         List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(itemId, authorId, currentTime);
 
