@@ -93,20 +93,15 @@ class BookingServiceMockTest {
 
     @Test
     void testAddBooking() {
-        // Настройка моков
+
         when(itemRepository.findById(testItem.getId())).thenReturn(Optional.of(testItem));
-//        when(userRepository.existsById(testUser.getId())).thenReturn(true);
-//        when(userRepository.existsById(testUser2.getId())).thenReturn(true);
-//        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         when(userRepository.findById(testUser2.getId())).thenReturn(Optional.of(testUser2));
         when(bookingRepository.save(any(Booking.class))).thenReturn(testBooking);
         when(bookingMapper.toBookingDto(testBooking)).thenReturn(testBookingDto);
         when(bookingMapper.toBooking(testBookingDto)).thenReturn(testBooking);
 
-        // Вызов тестируемого метода
         BookingDto result = bookingService.addBooking(testUser2.getId(), testBookingDto);
 
-        // Проверка результата
         assertNotNull(result);
         assertEquals(testBookingDto.getItemId(), result.getItemId());
         assertEquals(testBookingDto.getStart(), result.getStart());
@@ -115,13 +110,11 @@ class BookingServiceMockTest {
 
     @Test
     void testApproveBooking() {
-        // Настройка моков
         when(bookingRepository.findById(testBooking.getId())).thenReturn(Optional.of(testBooking));
-        when(userRepository.existsById(testUser.getId())).thenReturn(true); // Проверка существования пользователя
+        when(userRepository.existsById(testUser.getId())).thenReturn(true);
         when(bookingMapper.toBookingDto(testBooking)).thenReturn(testBookingDto);
 
-        // Вызов тестируемого метода
-        BookingDto approvedBooking = bookingService.approveBooking(testUser.getId(), testBooking.getId(), true);
+        bookingService.approveBooking(testUser.getId(), testBooking.getId(), true);
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 bookingService.approveBooking(2, testBooking.getId(), true));
         assertEquals("user not found", ex.getMessage());
@@ -129,33 +122,26 @@ class BookingServiceMockTest {
 
     @Test
     void testGetBookingById() {
-        // Настройка моков
         when(bookingRepository.findById(testBooking.getId())).thenReturn(Optional.of(testBooking));
-        when(userRepository.existsById(testUser.getId())).thenReturn(true); // Проверка существования пользователя
+        when(userRepository.existsById(testUser.getId())).thenReturn(true);
         when(bookingMapper.toBookingDto(testBooking)).thenReturn(testBookingDto);
 
-        // Вызов тестируемого метода
         BookingDto result = bookingService.getBookingById(testUser.getId(), testBooking.getId());
 
-        // Проверка результата
         assertEquals(testBooking.getItem().getId(), result.getItem().getId());
 
-        // Проверка исключения
         assertThrows(ValidationException.class, () ->
                 bookingService.getBookingById(2, testBooking.getId()));
     }
 
     @Test
     void testGetAllBookingsByBookerId() {
-        // Настройка моков
         when(bookingRepository.findAllByBookerId(testUser.getId())).thenReturn(List.of(testBooking));
-        when(userRepository.existsById(testUser.getId())).thenReturn(true); // Проверка существования пользователя
+        when(userRepository.existsById(testUser.getId())).thenReturn(true);
         when(bookingMapper.toBookingDto(testBooking)).thenReturn(testBookingDto);
 
-        // Вызов тестируемого метода
         List<BookingDto> fromDataBase = bookingService.getAllBookingsByBookerId(testUser.getId(), BookingState.ALL);
 
-        // Проверка результата
         assertEquals(List.of(testBookingDto), fromDataBase);
     }
 
