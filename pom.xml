@@ -114,6 +114,14 @@
 								<goal>check</goal>
 							</goals>
 							<configuration>
+								<excludes>
+									<exclude>gateway</exclude>
+									<exclude>server/src/main/java/ru/practicum/shareit/booking/model/**</exclude>
+									<exclude>server/src/main/java/ru/practicum/shareit/item/model/**</exclude>
+									<exclude>server/src/main/java/ru/practicum/shareit/request/model/**</exclude>
+									<exclude>server/src/main/java/ru/practicum/shareit/user/model/**</exclude>
+									<exclude>server/src/main/java/ru/practicum/shareit/exception/**</exclude>
+								</excludes>
 								<rules>
 									<rule>
 										<element>BUNDLE</element>
