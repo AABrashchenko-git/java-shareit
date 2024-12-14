@@ -276,6 +276,15 @@
 							<goals>
 								<goal>report</goal>
 							</goals>
+							<configuration>
+								<excludes>
+									<exclude>ru.practicum.shareit.booking.model.*</exclude>
+									<exclude>ru.practicum.shareit.item.model.*</exclude>
+									<exclude>ru.practicum.shareit.request.model.*</exclude>
+									<exclude>ru.practicum.shareit.user.model.*</exclude>
+									<exclude>ru.practicum.shareit.exception.*</exclude>
+								</excludes>
+							</configuration>
 						</execution>
 					</executions>
 				</plugin>
