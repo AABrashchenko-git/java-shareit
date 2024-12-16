@@ -32,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userStorage;
     private final BookingRepository bookingRepository;
     private final CommentMapper commentMapper;
+    private final ItemMapper itemMapper;
     private final CommentRepository commentRepository;
 
     @Override
@@ -39,9 +40,9 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addItem(Integer ownerId, ItemDto itemDto) {
         validateItemDto(itemDto);
         userStorage.findById(ownerId).orElseThrow(() -> new NotFoundException("User " + ownerId + " is not found"));
-        Item item = ItemMapper.itemDtoToItem(itemDto);
+        Item item = itemMapper.itemDtoToItem(itemDto);
         item.setOwnerId(ownerId);
-        return ItemMapper.itemToItemDto(itemStorage.save(item));
+        return itemMapper.itemToItemDto(itemStorage.save(item));
     }
 
     @Override
@@ -60,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null)
             item.setAvailable(itemDto.getAvailable());
 
-        return ItemMapper.itemToItemDto(item);
+        return itemMapper.itemToItemDto(item);
     }
 
     @Override
@@ -83,7 +84,7 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank())
             return Collections.emptyList();
         return itemStorage.findItemsBySearchQuery(text).stream()
-                .map(ItemMapper::itemToItemDto)
+                .map(itemMapper::itemToItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -110,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private ItemResponseOnlyDto prepareItemForResponseDto(Integer userId, Item item) {
-        ItemResponseOnlyDto itemResponseDto = ItemMapper.itemToItemResponseDto(item);
+        ItemResponseOnlyDto itemResponseDto = itemMapper.itemToItemResponseDto(item);
         List<Booking> bookingsOfItem = bookingRepository.findAllByItemOwnerId(item.getOwnerId());
 
         if (item.getOwnerId().equals(userId)) {

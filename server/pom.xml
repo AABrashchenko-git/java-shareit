@@ -24,7 +24,6 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest</artifactId>
-			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -62,9 +61,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
 			<optional>true</optional>
-			<!-- 	<scope>provided</scope>-->
 		</dependency>
 
 		<dependency>
@@ -72,7 +69,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 
 		<!-- MapStruct -->
 		<dependency>
@@ -92,10 +88,6 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok-mapstruct-binding</artifactId>
 			<version>${lombok-mapstruct-binding.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -236,10 +228,6 @@
 										<element>BUNDLE</element>
 										<limits>
 											<limit>
-												<!--Не понимаю, как jacoco считает процент покрытия тестами - если запускать их в идее (with coverage), то результаты другие -->
-												<!--Да и тестов я написал на всё, что только можно) пытался исключить пакеты и классы из проверок (может, он считает по отношению ко всем классам,
-												включая модели, мапперы и т.д. - но почему-то не сработало. Причину понять не могу, поэтому занизил требования в <limits></limits>
-												 -->
 												<counter>INSTRUCTION</counter>
 												<value>COVEREDRATIO</value>
 												<minimum>0.01</minimum>

@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.mapper.ItemMapperImpl;
 import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.model.ItemResponseOnlyDto;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ItemController.class)
+@Import(ItemMapperImpl.class)
 class ItemControllerTest {
     @MockBean
     private ItemService itemService;
@@ -35,6 +38,8 @@ class ItemControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private ItemMapper itemMapper;
     private ItemDto testItemDto;
     private ItemDto testItemDto2;
     private ItemDto testItemDto3;
@@ -191,6 +196,6 @@ class ItemControllerTest {
     }
 
     private ItemResponseOnlyDto dtoToResponseDtoForTest(ItemDto itemDto) {
-        return ItemMapper.itemToItemResponseDto(ItemMapper.itemDtoToItem(itemDto));
+        return itemMapper.itemToItemResponseDto(itemMapper.itemDtoToItem(itemDto));
     }
 }

@@ -22,7 +22,7 @@ public class BookingController {
     public ResponseEntity<Object> addBooking(@RequestHeader("${shareit.header.owner}") Integer bookerId,
                                              @RequestBody BookingDto bookingDto) {
         log.info("POST /bookings {} is accessed by bookerId: {}", bookingDto, bookerId);
-        return bookingClient.bookItem(bookerId, bookingDto);
+        return bookingClient.addBooking(bookerId, bookingDto);
     }
 
     @PatchMapping("{bookingId}") //?approved={approved}
@@ -36,7 +36,7 @@ public class BookingController {
     public ResponseEntity<Object> getBookingById(@RequestHeader("${shareit.header.owner}") Integer userId,
                                                  @PathVariable Integer bookingId) {
         log.info("GET /bookings/{} is accessed", bookingId);
-        return bookingClient.getBooking(userId, bookingId);
+        return bookingClient.getBookingById(userId, bookingId);
     }
 
     @GetMapping

@@ -16,6 +16,7 @@ import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -31,19 +32,16 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceMockTest {
-
     @Mock
     private BookingRepository bookingRepository;
-
     @Mock
     private ItemRepository itemRepository;
-
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private BookingMapper bookingMapper;
-
+    @Mock
+    private ItemMapper itemMapper;
     @InjectMocks
     private BookingServiceImpl bookingService;
 
@@ -80,13 +78,21 @@ class BookingServiceMockTest {
         testBooking.setBooker(testUser);
         testBooking.setStatus(BookingStatus.WAITING);
 
+        when(itemMapper.itemToItemDto(testItem)).thenReturn(ItemDto.builder()
+                .id(testItem.getId())
+                .name(testItem.getName())
+                .description(testItem.getDescription())
+                .available(testItem.getAvailable())
+                .ownerId(testItem.getOwnerId())
+                .build());
+
         testBookingDto = BookingDto.builder()
                 .id(testBooking.getId())
                 .itemId(testItem.getId())
                 .start(testBooking.getStart())
                 .end(testBooking.getEnd())
                 .status(BookingStatus.APPROVED)
-                .item(ItemMapper.itemToItemDto(testItem))
+                .item(itemMapper.itemToItemDto(testItem))
                 .booker(UserMapper.userToUserDto(testUser2))
                 .build();
     }

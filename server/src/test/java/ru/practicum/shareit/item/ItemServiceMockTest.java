@@ -10,6 +10,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.*;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -26,22 +27,18 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceMockTest {
-
     @Mock
     private ItemRepository itemStorage;
-
     @Mock
     private UserRepository userStorage;
-
     @Mock
     private BookingRepository bookingRepository;
-
     @Mock
     private CommentRepository commentRepository;
-
     @Mock
     private CommentMapper commentMapper;
-
+    @Mock
+    private ItemMapper itemMapper;
     @InjectMocks
     private ItemServiceImpl itemService;
 
@@ -51,6 +48,7 @@ public class ItemServiceMockTest {
     private Comment testComment;
     private ItemDto testItemDto;
     private CommentDto testCommentDto;
+    private ItemResponseOnlyDto testItemResponseOnlyDto;
 
     @BeforeEach
     public void setUp() {
@@ -91,6 +89,17 @@ public class ItemServiceMockTest {
         testCommentDto = new CommentDto();
         testCommentDto.setId(Long.valueOf(testComment.getId()));
         testCommentDto.setText(testComment.getText());
+
+        testItemResponseOnlyDto = ItemResponseOnlyDto.builder()
+                .id(testItem.getId())
+                .name(testItem.getName())
+                .description(testItem.getDescription())
+                .available(testItem.getAvailable())
+                .build();
+
+        lenient().when(itemMapper.itemToItemDto(testItem)).thenReturn(testItemDto);
+        lenient().when(itemMapper.itemDtoToItem(testItemDto)).thenReturn(testItem);
+        lenient().when(itemMapper.itemToItemResponseDto(testItem)).thenReturn(testItemResponseOnlyDto);
     }
 
     @Test
@@ -110,6 +119,7 @@ public class ItemServiceMockTest {
 
     @Test
     public void testEditItem() {
+
         when(itemStorage.findById(testItem.getId())).thenReturn(Optional.of(testItem));
 
         ItemDto updatedItemDto = ItemDto.builder()
@@ -117,6 +127,10 @@ public class ItemServiceMockTest {
                 .name("Updated Name")
                 .description("Updated Description")
                 .available(false).build();
+
+        testItemDto.setName("Updated Name");
+        testItemDto.setDescription("Updated Description");
+        testItemDto.setAvailable(false);
 
         ItemDto result = itemService.editItem(testUser.getId(), testItem.getId(), updatedItemDto);
 

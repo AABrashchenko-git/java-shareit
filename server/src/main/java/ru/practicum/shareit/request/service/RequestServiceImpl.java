@@ -25,6 +25,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final ItemMapper itemMapper;
 
     @Override
     public List<ItemRequestDto> getAllRequestsByOwner(Integer ownerId) {
@@ -34,7 +35,7 @@ public class RequestServiceImpl implements RequestService {
                 .map(ItemRequestMapper::itemRequestToitemRequestDto)
                 .peek(rDto -> {
                     List<ItemDto> itemsOfRequest = itemRepository.findAllByRequestId(rDto.getId()).stream()
-                            .map(ItemMapper::itemToItemDto)
+                            .map(itemMapper::itemToItemDto)
                             .collect(Collectors.toList());
                     rDto.setItems(itemsOfRequest);
                 })
@@ -49,7 +50,7 @@ public class RequestServiceImpl implements RequestService {
                 .map(ItemRequestMapper::itemRequestToitemRequestDto)
                 .peek(rDto -> {
                     List<ItemDto> itemsOfRequest = itemRepository.findAllByRequestId(rDto.getId()).stream()
-                            .map(ItemMapper::itemToItemDto)
+                            .map(itemMapper::itemToItemDto)
                             .collect(Collectors.toList());
                     rDto.setItems(itemsOfRequest);
                 })
@@ -66,7 +67,7 @@ public class RequestServiceImpl implements RequestService {
         requestDto.setRequestorId(request.getRequestor().getId());
 
         List<ItemDto> itemsOfRequest = itemRepository.findAllByRequestId(requestId).stream()
-                .map(ItemMapper::itemToItemDto)
+                .map(itemMapper::itemToItemDto)
                 .collect(Collectors.toList());
         requestDto.setItems(itemsOfRequest);
 
